@@ -148,14 +148,26 @@ class MarketSimulator:
 
     def execute_hedger_strategy(self, team: Team):
         """Conservative strategy with stop-loss"""
-        if len(team.positions) > 0:
-            for pos in list(team.positions):
-                pnl_pct = (self.market_state.price - pos.entry_price) / pos.entry_price * 100
+        # 1. Start with an empty list for positions we want to KEEP
+        kept_positions = []
+        
+        # 2. Iterate through current positions
+        for pos in team.positions:
+            pnl_pct = (self.market_state.price - pos.entry_price) / pos.entry_price * 100
 
-                if pnl_pct < -team.parameters.stop_loss or pnl_pct > team.parameters.take_profit:
-                    team.balance += pos.quantity * self.market_state.price
-                    team.positions.remove(pos)
-        else:
+            # Check if we should CLOSE the trade
+            if pnl_pct < -team.parameters.stop_loss or pnl_pct > team.parameters.take_profit:
+                # Sell and add cash to balance immediately
+                team.balance += pos.quantity * self.market_state.price
+            else:
+                # Keep the position
+                kept_positions.append(pos)
+        
+        # 3. Update the team's positions list in one go
+        team.positions = kept_positions
+
+        # 4. Open new positions if we have no active trades (existing logic)
+        if len(team.positions) == 0:
             if np.random.random() < 0.05:
                 quantity = (team.balance * 0.05) / self.market_state.price
                 if quantity > 0 and team.balance > quantity * self.market_state.price:

@@ -6,7 +6,6 @@ router = APIRouter()
 
 @router.get("/tick")
 async def get_market_tick():
-    """Get current market state"""
     if not simulator:
         raise HTTPException(status_code=503, detail="Simulator not initialized")
 
@@ -47,7 +46,6 @@ async def get_active_events():
     return {"active": False, "event": None}
 
 
-# ==================== backend/routes/teams.py ====================
 from fastapi import APIRouter, HTTPException
 from models import Team, StrategyType, StrategyParams
 from simulation import simulator
