@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from models import Team, StrategyType, StrategyParams
 from simulation import simulator
-from typing import List
 
 router = APIRouter()
 
